@@ -3,10 +3,11 @@ import { useForm, useField } from 'vee-validate'
 import { loginSchema } from '../validation/loginSchema.js'
 import { useFirebaseAuth } from 'vuefire';
 import { GoogleAuthProvider, getAuth, signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { ref } from 'vue'
+const { handleSubmit } = useForm({});
 
-const { handleSubmit } = useForm({  });
-
-
+const userGoogle = ref([])
+const showInfo = ref(false)
 const provider = new GoogleAuthProvider();
 const email = useField('email')
 const password = useField('password');
@@ -17,7 +18,7 @@ const submit = handleSubmit((values) => {
     signInWithEmailAndPassword(auth, values.email, values.password)
         .then((userCredential) => {
             const user = userCredential.user;
-            console.log(user)
+
         }).catch((error) => {
             const errorCode = error.code;
             console.log(errorCode)
@@ -33,11 +34,9 @@ const submitFireBase = handleSubmit(() => {
             const token = credential.accessToken;
             // The signed-in user info.
             const user = result.user;
-            // IdP data available using getAdditionalUserInfo(result)
-            // ...
+            userGoogle.value = user
             console.log(user)
-            alert('Bienvenido ' + user.displayName)
-
+            showInfo.value = true
         }).catch((error) => {
             // Handle Errors here.
             const errorCode = error.code;
@@ -95,11 +94,40 @@ const submitFireBase = handleSubmit(() => {
                     background-color: #4285F4;
                     margin-bottom: 10px
                ;
-                    " 
-                    color="red" icon="mdi-google" @click="submitFireBase">
-                    G
-                </v-btn>
-                   
+                    " color="red" icon="mdi-google" @click="submitFireBase">
+            G
+        </v-btn>
+
 
     </v-card>
+    <v-card v-if="showInfo" flat max-width="600" class="mx-auto mt-10"
+        style="display: flex; justify-content: center; flex-direction: column;
+        align-items: center;
+
+        "
+    >
+        <v-card-title class="text-h4 font-weight-bold" tag="h3">
+            Información de Usuario
+        </v-card-title>
+        <v-card-subtitle class="text-p">
+
+            Nombre: {{ userGoogle.displayName }}
+        </v-card-subtitle>
+        <v-card-subtitle class="text-p">
+
+            Correo:{{ userGoogle.email }}
+        </v-card-subtitle>
+        <v-divider class="mt-3"></v-divider>
+        <v-card-subtitle class="text-p">
+            Mi foto de perfil es:
+        </v-card-subtitle>
+        <img :src="userGoogle.photoURL" alt="">
+       <v-btn color="red" 
+        style="margin-top: 10px"
+       @click="showInfo = false">
+                    Cerrar
+                </v-btn>
+    </v-card>
+
+     
 </template>
